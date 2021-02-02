@@ -2,7 +2,7 @@ import styled from 'styled-components/native';
 
 export const Container = styled.SafeAreaView`
   flex: 1;
-  background-color: ${(props) => props.theme.black};
+  background-color: ${({theme}) => theme.black};
 `;
 
 export const MessagesContainer = styled.View`
@@ -22,7 +22,7 @@ export const TextInput = styled.TextInput`
   font-family: SourceSansPro-Regular;
   font-size: 16px;
   letter-spacing: 0.5px;
-  color: ${(props) => props.theme.white};
+  color: ${({theme}) => theme.white};
   margin-right: 24px;
 `;
 

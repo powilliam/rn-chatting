@@ -22,7 +22,7 @@ export const Title = styled.Text`
   font-size: 16px;
   font-family: SourceSansPro-SemiBold;
   letter-spacing: 0.5px;
-  color: ${(props) => props.theme.white};
+  color: ${({theme}) => theme.white};
 `;
 
 export const Description = styled.Text`
@@ -31,5 +31,5 @@ export const Description = styled.Text`
   font-size: 12.8px;
   font-family: SourceSansPro-Regular;
   letter-spacing: 0.4px;
-  color: ${(props) => props.theme.gray};
+  color: ${({theme}) => theme.gray};
 `;

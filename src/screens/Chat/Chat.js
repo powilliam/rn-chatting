@@ -3,7 +3,7 @@ import {View} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
 
-import {Toolbar, PressableIcon, Divider} from '../../components';
+import {Toolbar, PressableIcon, Divider} from 'src/components';
 
 import {
   Container,

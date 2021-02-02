@@ -4,9 +4,9 @@ import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
 import FeatherIcons from 'react-native-vector-icons/Feather';
 
-import {Toolbar, Divider} from '../../components';
+import {Toolbar, Divider} from 'src/components';
 
-import {DEFAULT_ICON_SIZE, DEFAULT_HIT_SLOP} from '../../constants/touchables';
+import {DEFAULT_ICON_SIZE, DEFAULT_HIT_SLOP} from 'src/constants/touchables';
 
 import {
   Container,
