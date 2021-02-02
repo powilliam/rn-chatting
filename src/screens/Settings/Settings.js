@@ -6,7 +6,7 @@ import FeatherIcons from 'react-native-vector-icons/Feather';
 
 import {Toolbar, Divider} from '../../components';
 
-import {DEFAULT_ICON_SIZE, DEFAULT_HIT_STOP} from '../../constants/touchables';
+import {DEFAULT_ICON_SIZE, DEFAULT_HIT_SLOP} from '../../constants/touchables';
 
 import {
   Container,
@@ -20,7 +20,7 @@ import {
 
 const Settings = () => {
   const {goBack} = useNavigation();
-  const {white_of_opacity_of_12, red, white} = useTheme();
+  const {white_with_opacity_of_12, red, white} = useTheme();
 
   return (
     <Container>
@@ -43,8 +43,8 @@ const Settings = () => {
         <InformationTitle>last synchronization</InformationTitle>
         <InformationDescription>32 minutes ago</InformationDescription>
       </InformationContainer>
-      <Divider color={white_of_opacity_of_12} />
-      <TouchableOpacity onPress={() => {}} hitSlop={DEFAULT_HIT_STOP}>
+      <Divider color={white_with_opacity_of_12} />
+      <TouchableOpacity onPress={() => {}} hitSlop={DEFAULT_HIT_SLOP}>
         <SettingsAction>
           <View>
             <SettingsActionTitle color={red}>
