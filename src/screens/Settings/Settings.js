@@ -4,6 +4,8 @@ import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
 import FeatherIcons from 'react-native-vector-icons/Feather';
 
+import {useMessages} from 'src/contexts';
+
 import {Toolbar, Divider} from 'src/components';
 
 import {DEFAULT_ICON_SIZE, DEFAULT_HIT_SLOP} from 'src/constants/touchables';
@@ -21,6 +23,7 @@ import {
 const Settings = () => {
   const {goBack} = useNavigation();
   const {white_with_opacity_of_12, red, white} = useTheme();
+  const {deleteAll} = useMessages();
 
   return (
     <Container>
@@ -44,7 +47,7 @@ const Settings = () => {
         <InformationDescription>32 minutes ago</InformationDescription>
       </InformationContainer>
       <Divider color={white_with_opacity_of_12} />
-      <TouchableOpacity onPress={() => {}} hitSlop={DEFAULT_HIT_SLOP}>
+      <TouchableOpacity onPress={deleteAll} hitSlop={DEFAULT_HIT_SLOP}>
         <SettingsAction>
           <View>
             <SettingsActionTitle color={red}>
