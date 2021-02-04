@@ -5,6 +5,7 @@ import React, {
   useCallback,
   createContext,
 } from 'react';
+import {v4 as uuidv4} from 'uuid';
 
 import {useRealm} from './RealmContext';
 import {useUser} from './UserContext';
@@ -32,6 +33,7 @@ export const MessagesProvider = ({children}) => {
     (content) => {
       realm.write(() => {
         realm.create('message', {
+          uuid: uuidv4(),
           content,
           author_id: id,
           timestamps: Date.now(),

@@ -43,7 +43,7 @@ const Chat = () => {
     [],
   );
 
-  const keyExtractor = useCallback((item, index) => index.toString(), []);
+  const keyExtractor = useCallback((item) => item.uuid, []);
 
   return (
     <Container>
