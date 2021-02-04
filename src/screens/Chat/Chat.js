@@ -1,13 +1,14 @@
-import React, {useCallback} from 'react';
-import {View} from 'react-native';
+import React, {useState, useCallback} from 'react';
+import {FlatList} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
 
-import {Toolbar, PressableIcon, Divider} from 'src/components';
+import {useMessages} from 'src/contexts';
+
+import {Toolbar, PressableIcon, Message} from 'src/components';
 
 import {
   Container,
-  MessagesContainer,
   TextInputContainer,
   TextInput,
   TextInputActions,
@@ -17,10 +18,32 @@ import {
 const Chat = () => {
   const {gray} = useTheme();
   const {navigate} = useNavigation();
+  const {messages, create} = useMessages();
+
+  const [content, setContent] = useState('');
 
   const navigateToSettings = useCallback(() => navigate('SettingsScreen'), [
     navigate,
   ]);
+
+  const handleSubmitMessage = useCallback(() => {
+    if (!content) return;
+    create(content);
+    setContent('');
+  }, [content, create]);
+
+  const renderItem = useCallback(
+    ({item}) => (
+      <Message
+        authorId={item.author_id}
+        content={item.content}
+        timestamps={item.timestamps}
+      />
+    ),
+    [],
+  );
+
+  const keyExtractor = useCallback((item) => item.uuid, []);
 
   return (
     <Container>
@@ -30,21 +53,24 @@ const Chat = () => {
         rightIcon="settings"
         onPressRightIcon={navigateToSettings}
       />
-      <MessagesContainer />
-      <View>
-        <Divider />
-        <TextInputContainer>
-          <TextInput
-            placeholder="Say something..."
-            placeholderTextColor={gray}
-          />
-          <TextInputActions>
-            <PressableIcon name="smile" onPress={() => {}} />
-            <TextInputActionIconSpace />
-            <PressableIcon name="send" onPress={() => {}} />
-          </TextInputActions>
-        </TextInputContainer>
-      </View>
+      <FlatList
+        data={messages}
+        renderItem={renderItem}
+        keyExtractor={keyExtractor}
+      />
+      <TextInputContainer>
+        <TextInput
+          placeholder="Say something..."
+          placeholderTextColor={gray}
+          value={content}
+          onChangeText={(text) => setContent(text)}
+        />
+        <TextInputActions>
+          <PressableIcon name="smile" onPress={() => {}} />
+          <TextInputActionIconSpace />
+          <PressableIcon name="send" onPress={handleSubmitMessage} />
+        </TextInputActions>
+      </TextInputContainer>
     </Container>
   );
 };

@@ -15,6 +15,6 @@ const PressableIcon = ({name, onPress}) => {
 };
 
 const arePropsEqual = (prevProps, nextProps) =>
-  prevProps.name === nextProps.name;
+  prevProps.name === nextProps.name && prevProps.onPress === nextProps.onPress;
 
 export default memo(PressableIcon, arePropsEqual);
