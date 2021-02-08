@@ -6,6 +6,10 @@ import React, {
   createContext,
 } from 'react';
 import {v4 as uuidv4} from 'uuid';
+import {useNetInfo} from '@react-native-community/netinfo';
+import {io} from 'socket.io-client';
+
+import {apiService} from 'src/services';
 
 import {useRealm} from './RealmContext';
 import {useUser} from './UserContext';
@@ -16,7 +20,9 @@ export const useMessages = () => useContext(MessagesContext);
 
 export const MessagesProvider = ({children}) => {
   const realm = useRealm();
-  const {id} = useUser();
+  const {username, uuid} = useUser();
+  const {isConnected} = useNetInfo();
+  const socket = io('https://guarded-sands-64792.herokuapp.com');
 
   const [messages, setMessages] = useState([]);
 
@@ -29,18 +35,32 @@ export const MessagesProvider = ({children}) => {
     return () => messageObjects.removeAllListeners();
   }, [realm]);
 
-  const create = useCallback(
-    (content) => {
+  useEffect(() => {
+    if (!realm) return;
+    socket.on('new-message', (data) => {
       realm.write(() => {
-        realm.create('message', {
-          uuid: uuidv4(),
-          content,
-          author_id: id,
-          timestamps: Date.now(),
-        });
+        realm.create('message', data, true);
       });
+    });
+  }, [realm, socket]);
+
+  const create = useCallback(
+    async (content) => {
+      const message = {
+        uuid: uuidv4(),
+        content,
+        author_uuid: uuid,
+        author_name: username,
+        timestamps: Date.now(),
+      };
+      realm.write(() => {
+        realm.create('message', message);
+      });
+      if (isConnected) {
+        await apiService.post('/v1/messages', message);
+      }
     },
-    [realm, id],
+    [realm, uuid, isConnected, username],
   );
 
   const deleteAll = useCallback(() => {
