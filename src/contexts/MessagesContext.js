@@ -11,6 +11,8 @@ import {io} from 'socket.io-client';
 
 import {apiService} from 'src/services';
 
+import {MESSAGE_STATUS} from 'src/database';
+
 import {useRealm} from './RealmContext';
 import {useUser} from './UserContext';
 
@@ -39,7 +41,18 @@ export const MessagesProvider = ({children}) => {
     if (!realm) return;
     socket.on('new-message', (data) => {
       realm.write(() => {
-        realm.create('message', data, true);
+        realm.create('message', {...data, status: MESSAGE_STATUS.SYNCED}, true);
+      });
+    });
+    socket.on('pushed-messages', (data) => {
+      data.forEach((message) => {
+        realm.write(() => {
+          realm.create(
+            'message',
+            {...message, status: MESSAGE_STATUS.SYNCED},
+            true,
+          );
+        });
       });
     });
   }, [realm, socket]);
@@ -51,6 +64,7 @@ export const MessagesProvider = ({children}) => {
         content,
         author_uuid: uuid,
         author_name: username,
+        status: isConnected ? MESSAGE_STATUS.PENDING : MESSAGE_STATUS.SCHEDULED,
         timestamps: Date.now(),
       };
       realm.write(() => {
@@ -58,6 +72,13 @@ export const MessagesProvider = ({children}) => {
       });
       if (isConnected) {
         await apiService.post('/v1/messages', message);
+        realm.write(() => {
+          realm.create(
+            'message',
+            {...message, status: MESSAGE_STATUS.SYNCED},
+            true,
+          );
+        });
       }
     },
     [realm, uuid, isConnected, username],
