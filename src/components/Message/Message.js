@@ -5,7 +5,7 @@ import {useUser} from 'src/contexts';
 
 import {Container, Timestamp, Content, Value} from './styles';
 
-const Message = ({authorUuid, authorName, content, timestamps}) => {
+const Message = ({authorUuid, authorName, content, timestamps, status}) => {
   const {uuid} = useUser();
 
   const aligment = useMemo(
@@ -15,8 +15,10 @@ const Message = ({authorUuid, authorName, content, timestamps}) => {
 
   const formatedTimestamp = useMemo(() => {
     const time = format(timestamps, 'p');
-    return authorUuid === uuid ? time : `${time} - ${authorName}`;
-  }, [timestamps, authorName, authorUuid, uuid]);
+    return authorUuid === uuid
+      ? `${status} - ${time}`
+      : `${time} - ${authorName}`;
+  }, [timestamps, authorName, authorUuid, uuid, status]);
 
   return (
     <Container aligment={aligment}>
@@ -32,6 +34,7 @@ const arePropsEqual = (prevProps, nextProps) =>
   prevProps.value === nextProps.value &&
   prevProps.authorUuid === nextProps.authorUuid &&
   prevProps.authorName === nextProps.authorName &&
+  prevProps.status === nextProps.status &&
   prevProps.timestamps === nextProps.timestamps;
 
 export default memo(Message, arePropsEqual);

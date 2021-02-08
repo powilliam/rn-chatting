@@ -33,3 +33,17 @@ export const Description = styled.Text`
   letter-spacing: 0.4px;
   color: ${({theme}) => theme.gray};
 `;
+
+export const StatusContainer = styled.View`
+  padding: 8px 16px;
+  align-items: center;
+  justify-content: center;
+`;
+
+export const StatusMessage = styled.Text`
+  font-size: 12.8px;
+  font-family: SourceSansPro-Semibold;
+  letter-spacing: 0.4px;
+  color: ${({red, theme}) => (red ? theme.red : theme.gray)};
+  text-transform: uppercase;
+`;

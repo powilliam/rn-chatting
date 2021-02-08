@@ -41,6 +41,7 @@ const Chat = () => {
         authorName={item.author_name}
         content={item.content}
         timestamps={item.timestamps}
+        status={item.status}
       />
     ),
     [],

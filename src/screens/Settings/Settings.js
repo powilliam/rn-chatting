@@ -2,9 +2,10 @@ import React, {useMemo} from 'react';
 import {View, TouchableOpacity} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
+import {format} from 'date-fns';
 import FeatherIcons from 'react-native-vector-icons/Feather';
 
-import {useMessages, useUser} from 'src/contexts';
+import {useMessages, useUser, useSynchronization} from 'src/contexts';
 
 import {Toolbar, Divider} from 'src/components';
 
@@ -25,9 +26,11 @@ const Settings = () => {
   const {white_with_opacity_of_12, red, white} = useTheme();
   const {deleteAll} = useMessages();
   const {username, uuid} = useUser();
+  const {lastSync} = useSynchronization();
 
   const memoizedUsername = useMemo(() => username ?? 'UNSIGNED', [username]);
   const memoizedUuid = useMemo(() => uuid ?? 'UNSIGNED', [uuid]);
+  const formatedLastSync = useMemo(() => format(lastSync, 'p'), [lastSync]);
 
   return (
     <Container>
@@ -49,7 +52,7 @@ const Settings = () => {
 
       <InformationContainer>
         <InformationTitle>last synchronization</InformationTitle>
-        <InformationDescription>32 minutes ago</InformationDescription>
+        <InformationDescription>{formatedLastSync}</InformationDescription>
       </InformationContainer>
 
       <Divider color={white_with_opacity_of_12} />

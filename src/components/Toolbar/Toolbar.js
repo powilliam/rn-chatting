@@ -1,8 +1,19 @@
 import React, {memo} from 'react';
+import {useNetInfo} from '@react-native-community/netinfo';
+
+import {useSynchronization} from 'src/contexts';
 
 import {PressableIcon} from '../PressableIcon';
 
-import {Container, EmptySpace, Content, Title, Description} from './styles';
+import {
+  Container,
+  EmptySpace,
+  Content,
+  Title,
+  Description,
+  StatusContainer,
+  StatusMessage,
+} from './styles';
 
 const Toolbar = ({
   title,
@@ -11,30 +22,42 @@ const Toolbar = ({
   onPressLeftIcon,
   rightIcon,
   onPressRightIcon,
-  children,
-}) => (
-  <>
-    <Container>
-      {leftIcon ? (
-        <PressableIcon name={leftIcon} onPress={onPressLeftIcon} />
-      ) : (
-        <EmptySpace />
-      )}
-      <Content>
-        <Title>{title}</Title>
-        {description && (
-          <Description numberOfLines={1}>{description}</Description>
+}) => {
+  const {isConnected} = useNetInfo();
+  const {isSynchronizing} = useSynchronization();
+
+  return (
+    <>
+      <Container>
+        {leftIcon ? (
+          <PressableIcon name={leftIcon} onPress={onPressLeftIcon} />
+        ) : (
+          <EmptySpace />
         )}
-      </Content>
-      {rightIcon ? (
-        <PressableIcon name={rightIcon} onPress={onPressRightIcon} />
-      ) : (
-        <EmptySpace />
-      )}
-    </Container>
-    {children}
-  </>
-);
+        <Content>
+          <Title>{title}</Title>
+          {description && (
+            <Description numberOfLines={1}>{description}</Description>
+          )}
+        </Content>
+        {rightIcon ? (
+          <PressableIcon name={rightIcon} onPress={onPressRightIcon} />
+        ) : (
+          <EmptySpace />
+        )}
+      </Container>
+
+      <StatusContainer>
+        {!isConnected && (
+          <StatusMessage red>
+            you’re offline. Waiting connection to sync...
+          </StatusMessage>
+        )}
+        {isSynchronizing && <StatusMessage>synchronizing</StatusMessage>}
+      </StatusContainer>
+    </>
+  );
+};
 
 const arePropsEqual = (prevProps, nextProps) =>
   prevProps.title === nextProps.title &&
