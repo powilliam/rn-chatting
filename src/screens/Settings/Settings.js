@@ -36,29 +36,36 @@ const Settings = () => {
         leftIcon="chevron-left"
         onPressLeftIcon={goBack}
       />
+
       <InformationContainer>
         <InformationTitle>display name</InformationTitle>
         <InformationDescription>{memoizedUsername}</InformationDescription>
       </InformationContainer>
+
       <InformationContainer>
         <InformationTitle>unique identifier</InformationTitle>
         <InformationDescription>{memoizedUuid}</InformationDescription>
       </InformationContainer>
+
       <InformationContainer>
         <InformationTitle>last synchronization</InformationTitle>
         <InformationDescription>32 minutes ago</InformationDescription>
       </InformationContainer>
+
       <Divider color={white_with_opacity_of_12} />
+
       <TouchableOpacity onPress={deleteAll} hitSlop={DEFAULT_HIT_SLOP}>
         <SettingsAction>
           <View>
             <SettingsActionTitle color={red}>
               Delete all messages
             </SettingsActionTitle>
+
             <SettingsActionDescription>
               You won’t be able to recovery any data
             </SettingsActionDescription>
           </View>
+
           <FeatherIcons name="trash" size={DEFAULT_ICON_SIZE} color={white} />
         </SettingsAction>
       </TouchableOpacity>

@@ -56,11 +56,13 @@ const Chat = () => {
         rightIcon="settings"
         onPressRightIcon={navigateToSettings}
       />
+
       <FlatList
         data={messages}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
       />
+
       {username && uuid && (
         <TextInputContainer>
           <TextInput
@@ -69,6 +71,7 @@ const Chat = () => {
             value={content}
             onChangeText={(text) => setContent(text)}
           />
+
           <TextInputActions>
             <PressableIcon name="smile" onPress={() => {}} />
             <TextInputActionIconSpace />
