@@ -5,17 +5,18 @@ import {useUser} from 'src/contexts';
 
 import {Container, Timestamp, Content, Value} from './styles';
 
-const Message = ({authorId, content, timestamps}) => {
-  const {id} = useUser();
+const Message = ({authorUuid, authorName, content, timestamps}) => {
+  const {uuid} = useUser();
 
   const aligment = useMemo(
-    () => (authorId === id ? 'flex-end' : 'flex-start'),
-    [authorId, id],
+    () => (authorUuid === uuid ? 'flex-end' : 'flex-start'),
+    [authorUuid, uuid],
   );
 
-  const formatedTimestamp = useMemo(() => format(timestamps, 'p'), [
-    timestamps,
-  ]);
+  const formatedTimestamp = useMemo(() => {
+    const time = format(timestamps, 'p');
+    return authorUuid === uuid ? time : `${time} - ${authorName}`;
+  }, [timestamps, authorName, authorUuid, uuid]);
 
   return (
     <Container aligment={aligment}>
@@ -29,7 +30,8 @@ const Message = ({authorId, content, timestamps}) => {
 
 const arePropsEqual = (prevProps, nextProps) =>
   prevProps.value === nextProps.value &&
-  prevProps.authorId === nextProps.authorId &&
+  prevProps.authorUuid === nextProps.authorUuid &&
+  prevProps.authorName === nextProps.authorName &&
   prevProps.timestamps === nextProps.timestamps;
 
 export default memo(Message, arePropsEqual);

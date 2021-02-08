@@ -3,7 +3,7 @@ import {FlatList} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
 
-import {useMessages} from 'src/contexts';
+import {useMessages, useUser} from 'src/contexts';
 
 import {Toolbar, PressableIcon, Message} from 'src/components';
 
@@ -19,6 +19,7 @@ const Chat = () => {
   const {gray} = useTheme();
   const {navigate} = useNavigation();
   const {messages, create} = useMessages();
+  const {username, uuid} = useUser();
 
   const [content, setContent] = useState('');
 
@@ -26,16 +27,18 @@ const Chat = () => {
     navigate,
   ]);
 
-  const handleSubmitMessage = useCallback(() => {
+  const handleSubmitMessage = useCallback(async () => {
     if (!content) return;
-    create(content);
+    const contentRef = content;
     setContent('');
+    await create(contentRef);
   }, [content, create]);
 
   const renderItem = useCallback(
     ({item}) => (
       <Message
-        authorId={item.author_id}
+        authorUuid={item.author_uuid}
+        authorName={item.author_name}
         content={item.content}
         timestamps={item.timestamps}
       />
@@ -58,19 +61,21 @@ const Chat = () => {
         renderItem={renderItem}
         keyExtractor={keyExtractor}
       />
-      <TextInputContainer>
-        <TextInput
-          placeholder="Say something..."
-          placeholderTextColor={gray}
-          value={content}
-          onChangeText={(text) => setContent(text)}
-        />
-        <TextInputActions>
-          <PressableIcon name="smile" onPress={() => {}} />
-          <TextInputActionIconSpace />
-          <PressableIcon name="send" onPress={handleSubmitMessage} />
-        </TextInputActions>
-      </TextInputContainer>
+      {username && uuid && (
+        <TextInputContainer>
+          <TextInput
+            placeholder="Say something..."
+            placeholderTextColor={gray}
+            value={content}
+            onChangeText={(text) => setContent(text)}
+          />
+          <TextInputActions>
+            <PressableIcon name="smile" onPress={() => {}} />
+            <TextInputActionIconSpace />
+            <PressableIcon name="send" onPress={handleSubmitMessage} />
+          </TextInputActions>
+        </TextInputContainer>
+      )}
     </Container>
   );
 };
