@@ -3,7 +3,8 @@ export const messageSchema = {
   properties: {
     uuid: 'string',
     content: 'string',
-    author_id: 'string',
+    author_uuid: 'string',
+    author_name: 'string',
     timestamps: 'int',
   },
   primaryKey: 'uuid',
