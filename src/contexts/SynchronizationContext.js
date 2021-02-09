@@ -1,12 +1,9 @@
 import React, {useState, useEffect, useContext, createContext} from 'react';
 import {useNetInfo} from '@react-native-community/netinfo';
-import AsyncStorage from '@react-native-async-storage/async-storage';
-
-import {TOKENS} from 'src/constants/storage';
 
 import {useRealm} from './RealmContext';
 
-import {synchronize, MESSAGE_STATUS} from 'src/database';
+import {synchronize} from 'src/database';
 
 export const SynchronizationContext = createContext({});
 
@@ -21,22 +18,15 @@ export const SynchronizationProvider = ({children}) => {
 
   useEffect(() => {
     if (!realm || !isConnected || !isInternetReachable) return;
-    (async () => {
-      setIsSynchronizing(true);
-      const scheduleds = realm
-        .objects('message')
-        .filtered(`status == '${MESSAGE_STATUS.SCHEDULED}'`);
-      const storedLastSync = await AsyncStorage.getItem(TOKENS.LAST_SYNC);
-      await synchronize({
-        realm,
-        lastSync: storedLastSync,
-        scheduleds,
+    setIsSynchronizing(true);
+    synchronize(realm)
+      .then((timestamps) => {
+        setLastSync(timestamps);
+        setIsSynchronizing(false);
+      })
+      .catch((_) => {
+        setIsSynchronizing(false);
       });
-      const timestamps = Date.now();
-      await AsyncStorage.setItem(TOKENS.LAST_SYNC, timestamps.toString());
-      setLastSync(timestamps);
-      setIsSynchronizing(false);
-    })();
   }, [realm, isConnected, isInternetReachable]);
 
   return (

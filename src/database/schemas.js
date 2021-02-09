@@ -1,18 +1,20 @@
-export const MESSAGE_STATUS = {
-  SYNCED: 'SYNCED',
-  PENDING: 'PENDING',
-  SCHEDULED: 'SCHEDULED',
-};
-
 export const messageSchema = {
-  name: 'message',
+  name: 'Message',
   properties: {
     uuid: 'string',
     content: 'string',
     author_uuid: 'string',
     author_name: 'string',
-    status: 'string',
     timestamps: 'int',
+  },
+  primaryKey: 'uuid',
+};
+
+export const scheduledSchema = {
+  name: 'Scheduled',
+  properties: {
+    uuid: 'string',
+    message: 'Message',
   },
   primaryKey: 'uuid',
 };

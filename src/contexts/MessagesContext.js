@@ -11,8 +11,6 @@ import {io} from 'socket.io-client';
 
 import {apiService} from 'src/services';
 
-import {MESSAGE_STATUS} from 'src/database';
-
 import {useRealm} from './RealmContext';
 import {useUser} from './UserContext';
 import {useSynchronization} from './SynchronizationContext';
@@ -38,7 +36,7 @@ export const MessagesProvider = ({children}) => {
 
   useEffect(() => {
     if (!realm) return;
-    const messageObjects = realm.objects('message');
+    const messageObjects = realm.objects('Message');
     messageObjects.addListener(() => {
       setMessages([...messageObjects.sorted('timestamps')]);
     });
@@ -49,19 +47,15 @@ export const MessagesProvider = ({children}) => {
     if (!realm || isSynchronizing || !isConnected || !isInternetReachable)
       return;
     socket.connect();
-    socket.on('new-message', (data) => {
+    socket.on('new-message', (message) => {
       realm.write(() => {
-        realm.create('message', {...data, status: MESSAGE_STATUS.SYNCED}, true);
+        realm.create('Message', message, true);
       });
     });
-    socket.on('pushed-messages', (data) => {
+    socket.on('pushed-messages', (pushedMessages) => {
       realm.write(() => {
-        data.forEach((message) => {
-          realm.create(
-            'message',
-            {...message, status: MESSAGE_STATUS.SYNCED},
-            true,
-          );
+        pushedMessages.forEach((message) => {
+          realm.create('Message', message, true);
         });
       });
     });
@@ -70,28 +64,24 @@ export const MessagesProvider = ({children}) => {
 
   const create = useCallback(
     async (content) => {
-      const message = {
-        uuid: uuidv4(),
-        content,
-        author_uuid: uuid,
-        author_name: username,
-        status:
-          isConnected && isInternetReachable
-            ? MESSAGE_STATUS.PENDING
-            : MESSAGE_STATUS.SCHEDULED,
-        timestamps: Date.now(),
-      };
+      let message;
       realm.write(() => {
-        realm.create('message', message);
+        message = realm.create('Message', {
+          uuid: uuidv4(),
+          content,
+          author_uuid: uuid,
+          author_name: username,
+          timestamps: Date.now(),
+        });
       });
       if (isConnected && isInternetReachable) {
         await apiService.post('/v1/messages', message);
+      } else {
         realm.write(() => {
-          realm.create(
-            'message',
-            {...message, status: MESSAGE_STATUS.SYNCED},
-            true,
-          );
+          realm.create('Scheduled', {
+            uuid: uuidv4(),
+            message,
+          });
         });
       }
     },
