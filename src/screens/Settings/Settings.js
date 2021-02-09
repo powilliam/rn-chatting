@@ -30,7 +30,9 @@ const Settings = () => {
 
   const memoizedUsername = useMemo(() => username ?? 'UNSIGNED', [username]);
   const memoizedUuid = useMemo(() => uuid ?? 'UNSIGNED', [uuid]);
-  const formatedLastSync = useMemo(() => format(lastSync, 'p'), [lastSync]);
+  const formatedLastSync = useMemo(() => lastSync && format(lastSync, 'p'), [
+    lastSync,
+  ]);
 
   return (
     <Container>

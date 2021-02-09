@@ -35,7 +35,8 @@ export const Description = styled.Text`
 `;
 
 export const StatusContainer = styled.View`
-  padding: 8px 16px;
+  padding: 0px 16px;
+  padding-bottom: 16px;
   align-items: center;
   justify-content: center;
 `;
@@ -44,6 +45,6 @@ export const StatusMessage = styled.Text`
   font-size: 12.8px;
   font-family: SourceSansPro-Semibold;
   letter-spacing: 0.4px;
-  color: ${({red, theme}) => (red ? theme.red : theme.gray)};
+  color: ${({red, theme}) => (red ? theme.red : theme.white_with_opacity)};
   text-transform: uppercase;
 `;

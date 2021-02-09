@@ -6,7 +6,7 @@ import {TOKENS} from 'src/constants/storage';
 
 import {useRealm} from './RealmContext';
 
-import {synchronize} from 'src/database';
+import {synchronize, MESSAGE_STATUS} from 'src/database';
 
 export const SynchronizationContext = createContext({});
 
@@ -14,22 +14,30 @@ export const useSynchronization = () => useContext(SynchronizationContext);
 
 export const SynchronizationProvider = ({children}) => {
   const realm = useRealm();
-  const {isConnected} = useNetInfo();
+  const {isConnected, isInternetReachable} = useNetInfo();
 
   const [isSynchronizing, setIsSynchronizing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
 
   useEffect(() => {
-    if (!realm || !isConnected) return;
+    if (!realm || !isConnected || !isInternetReachable) return;
     (async () => {
       setIsSynchronizing(true);
+      const scheduleds = realm
+        .objects('message')
+        .filtered(`status == '${MESSAGE_STATUS.SCHEDULED}'`);
       const storedLastSync = await AsyncStorage.getItem(TOKENS.LAST_SYNC);
-      const timestamps = await synchronize({realm, lastSync: storedLastSync});
-      setIsSynchronizing(false);
-      setLastSync(timestamps);
+      await synchronize({
+        realm,
+        lastSync: storedLastSync,
+        scheduleds,
+      });
+      const timestamps = Date.now();
       await AsyncStorage.setItem(TOKENS.LAST_SYNC, timestamps.toString());
+      setLastSync(timestamps);
+      setIsSynchronizing(false);
     })();
-  }, [realm, isConnected]);
+  }, [realm, isConnected, isInternetReachable]);
 
   return (
     <SynchronizationContext.Provider value={{isSynchronizing, lastSync}}>

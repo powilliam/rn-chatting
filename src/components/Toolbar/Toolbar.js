@@ -23,7 +23,7 @@ const Toolbar = ({
   rightIcon,
   onPressRightIcon,
 }) => {
-  const {isConnected} = useNetInfo();
+  const {isConnected, isInternetReachable} = useNetInfo();
   const {isSynchronizing} = useSynchronization();
 
   return (
@@ -48,9 +48,9 @@ const Toolbar = ({
       </Container>
 
       <StatusContainer>
-        {!isConnected && (
+        {!isConnected && !isInternetReachable && (
           <StatusMessage red>
-            you’re offline. Waiting connection to sync...
+            you’re offline. waiting connection to sync...
           </StatusMessage>
         )}
         {isSynchronizing && <StatusMessage>synchronizing</StatusMessage>}
