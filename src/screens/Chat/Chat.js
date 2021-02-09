@@ -2,9 +2,8 @@ import React, {useState, useCallback, useMemo} from 'react';
 import {FlatList} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
-import {useNetInfo} from '@react-native-community/netinfo';
 
-import {useMessages, useUser, useSynchronization} from 'src/contexts';
+import {useMessages, useUser} from 'src/contexts';
 
 import {Toolbar, PressableIcon, Message} from 'src/components';
 
@@ -21,20 +20,10 @@ const Chat = () => {
   const {navigate} = useNavigation();
   const {messages, create} = useMessages();
   const {username, uuid} = useUser();
-  const {isConnected, isInternetReachable} = useNetInfo();
-  const {isSynchronizing} = useSynchronization();
 
   const [content, setContent] = useState('');
 
-  const canSubmitMessages = useMemo(
-    () =>
-      username &&
-      uuid &&
-      isConnected &&
-      isInternetReachable &&
-      !isSynchronizing,
-    [username, uuid, isConnected, isInternetReachable, isSynchronizing],
-  );
+  const canSubmitMessages = useMemo(() => username && uuid, [username, uuid]);
 
   const navigateToSettings = useCallback(() => navigate('SettingsScreen'), [
     navigate,

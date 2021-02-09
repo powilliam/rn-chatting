@@ -54,6 +54,17 @@ export const MessagesProvider = ({children}) => {
         realm.create('message', {...data, status: MESSAGE_STATUS.SYNCED}, true);
       });
     });
+    socket.on('pushed-messages', (data) => {
+      realm.write(() => {
+        data.forEach((message) => {
+          realm.create(
+            'message',
+            {...message, status: MESSAGE_STATUS.SYNCED},
+            true,
+          );
+        });
+      });
+    });
     return () => socket.close();
   }, [realm, socket, isSynchronizing, isConnected, isInternetReachable]);
 
