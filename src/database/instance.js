@@ -1,9 +1,9 @@
 import Realm from 'realm';
 
-import {messageSchema} from './schemas';
+import {messageSchema, scheduledSchema} from './schemas';
 
 const realmConfig = {
-  schema: [messageSchema],
+  schema: [messageSchema, scheduledSchema],
   schemaVersion: 0,
 };
 

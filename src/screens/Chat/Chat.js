@@ -1,4 +1,4 @@
-import React, {useState, useCallback} from 'react';
+import React, {useState, useCallback, useMemo} from 'react';
 import {FlatList} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
@@ -22,6 +22,8 @@ const Chat = () => {
   const {username, uuid} = useUser();
 
   const [content, setContent] = useState('');
+
+  const canSubmitMessages = useMemo(() => username && uuid, [username, uuid]);
 
   const navigateToSettings = useCallback(() => navigate('SettingsScreen'), [
     navigate,
@@ -63,7 +65,7 @@ const Chat = () => {
         keyExtractor={keyExtractor}
       />
 
-      {username && uuid && (
+      {canSubmitMessages && (
         <TextInputContainer>
           <TextInput
             placeholder="Say something..."

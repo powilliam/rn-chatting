@@ -13,6 +13,7 @@ import {apiService} from 'src/services';
 
 import {useRealm} from './RealmContext';
 import {useUser} from './UserContext';
+import {useSynchronization} from './SynchronizationContext';
 
 export const MessagesContext = createContext({});
 
@@ -21,14 +22,21 @@ export const useMessages = () => useContext(MessagesContext);
 export const MessagesProvider = ({children}) => {
   const realm = useRealm();
   const {username, uuid} = useUser();
-  const {isConnected} = useNetInfo();
-  const socket = io('https://guarded-sands-64792.herokuapp.com');
+  const {isConnected, isInternetReachable} = useNetInfo();
+  const {isSynchronizing} = useSynchronization();
+
+  const socket = io('https://guarded-sands-64792.herokuapp.com', {
+    multiplex: false,
+    autoConnect: false,
+    forceNew: true,
+    reconnection: false,
+  });
 
   const [messages, setMessages] = useState([]);
 
   useEffect(() => {
     if (!realm) return;
-    const messageObjects = realm.objects('message');
+    const messageObjects = realm.objects('Message');
     messageObjects.addListener(() => {
       setMessages([...messageObjects.sorted('timestamps')]);
     });
@@ -36,31 +44,48 @@ export const MessagesProvider = ({children}) => {
   }, [realm]);
 
   useEffect(() => {
-    if (!realm) return;
-    socket.on('new-message', (data) => {
+    if (!realm || isSynchronizing || !isConnected || !isInternetReachable)
+      return;
+    socket.connect();
+    socket.on('new-message', (message) => {
       realm.write(() => {
-        realm.create('message', data, true);
+        realm.create('Message', message, true);
       });
     });
-  }, [realm, socket]);
+    socket.on('pushed-messages', (pushedMessages) => {
+      realm.write(() => {
+        pushedMessages.forEach((message) => {
+          realm.create('Message', message, true);
+        });
+      });
+    });
+    return () => socket.close();
+  }, [realm, socket, isSynchronizing, isConnected, isInternetReachable]);
 
   const create = useCallback(
     async (content) => {
-      const message = {
-        uuid: uuidv4(),
-        content,
-        author_uuid: uuid,
-        author_name: username,
-        timestamps: Date.now(),
-      };
+      let message;
       realm.write(() => {
-        realm.create('message', message);
+        message = realm.create('Message', {
+          uuid: uuidv4(),
+          content,
+          author_uuid: uuid,
+          author_name: username,
+          timestamps: Date.now(),
+        });
       });
-      if (isConnected) {
+      if (isConnected && isInternetReachable) {
         await apiService.post('/v1/messages', message);
+      } else {
+        realm.write(() => {
+          realm.create('Scheduled', {
+            uuid: uuidv4(),
+            message,
+          });
+        });
       }
     },
-    [realm, uuid, isConnected, username],
+    [realm, uuid, isConnected, username, isInternetReachable],
   );
 
   const deleteAll = useCallback(() => {
