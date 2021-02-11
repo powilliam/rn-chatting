@@ -10,11 +10,13 @@ export const pull = async (realm, lastSync) => {
   } = await apiService.get('/v1/sync/pull', {
     params: {last_sync: Number(lastSync)},
   });
-  realm.write(() => {
-    messages.forEach((message) => {
-      realm.create('Message', message, true);
+  if (messages.length > 0) {
+    realm.write(() => {
+      messages.forEach((message) => {
+        realm.create('Message', message, true);
+      });
     });
-  });
+  }
 };
 
 export const push = async (messages) => {

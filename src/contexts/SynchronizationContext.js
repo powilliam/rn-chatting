@@ -11,23 +11,23 @@ export const useSynchronization = () => useContext(SynchronizationContext);
 
 export const SynchronizationProvider = ({children}) => {
   const realm = useRealm();
-  const {isConnected, isInternetReachable} = useNetInfo();
+  const {isInternetReachable} = useNetInfo();
 
   const [isSynchronizing, setIsSynchronizing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
 
   useEffect(() => {
-    if (!realm || !isConnected || !isInternetReachable) return;
-    setIsSynchronizing(true);
-    synchronize(realm)
-      .then((timestamps) => {
+    if (!realm || !isInternetReachable) return;
+    (async () => {
+      setIsSynchronizing(true);
+      try {
+        const timestamps = await synchronize(realm);
         setLastSync(timestamps);
+      } finally {
         setIsSynchronizing(false);
-      })
-      .catch((_) => {
-        setIsSynchronizing(false);
-      });
-  }, [realm, isConnected, isInternetReachable]);
+      }
+    })();
+  }, [realm, isInternetReachable]);
 
   return (
     <SynchronizationContext.Provider value={{isSynchronizing, lastSync}}>

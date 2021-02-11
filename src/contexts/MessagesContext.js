@@ -22,7 +22,7 @@ export const useMessages = () => useContext(MessagesContext);
 export const MessagesProvider = ({children}) => {
   const realm = useRealm();
   const {username, uuid} = useUser();
-  const {isConnected, isInternetReachable} = useNetInfo();
+  const {isInternetReachable} = useNetInfo();
   const {isSynchronizing} = useSynchronization();
 
   const socket = io('https://guarded-sands-64792.herokuapp.com', {
@@ -44,8 +44,7 @@ export const MessagesProvider = ({children}) => {
   }, [realm]);
 
   useEffect(() => {
-    if (!realm || isSynchronizing || !isConnected || !isInternetReachable)
-      return;
+    if (!realm || isSynchronizing || !isInternetReachable) return;
     socket.connect();
     socket.on('new-message', (message) => {
       realm.write(() => {
@@ -60,7 +59,7 @@ export const MessagesProvider = ({children}) => {
       });
     });
     return () => socket.close();
-  }, [realm, socket, isSynchronizing, isConnected, isInternetReachable]);
+  }, [realm, socket, isInternetReachable, isSynchronizing]);
 
   const create = useCallback(
     async (content) => {
@@ -74,7 +73,7 @@ export const MessagesProvider = ({children}) => {
           timestamps: Date.now(),
         });
       });
-      if (isConnected && isInternetReachable) {
+      if (isInternetReachable) {
         await apiService.post('/v1/messages', message);
       } else {
         realm.write(() => {
@@ -85,7 +84,7 @@ export const MessagesProvider = ({children}) => {
         });
       }
     },
-    [realm, uuid, isConnected, username, isInternetReachable],
+    [realm, uuid, username, isInternetReachable],
   );
 
   const deleteAll = useCallback(() => {
