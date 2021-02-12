@@ -1,25 +1,31 @@
-import React, {useState, useCallback, useMemo} from 'react';
-import {FlatList} from 'react-native';
+import React, {useRef, useState, useEffect, useCallback, useMemo} from 'react';
+import {Keyboard} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
+import Ionicons from 'react-native-vector-icons/Ionicons';
 
-import {useMessages, useUser} from 'src/contexts';
+import {DEFAULT_HIT_SLOP} from 'src/constants/touchables';
 
-import {Toolbar, PressableIcon, Message} from 'src/components';
+import {useMessages, useUser, useRealm, useSynchronization} from 'src/contexts';
+
+import {Toolbar, Message} from 'src/components';
 
 import {
   Container,
+  MessageList,
   TextInputContainer,
   TextInput,
-  TextInputActions,
-  TextInputActionIconSpace,
+  SubmitButton,
 } from './styles';
 
 const Chat = () => {
-  const {gray} = useTheme();
+  const {white_with_opacity_of_60, white} = useTheme();
   const {navigate} = useNavigation();
   const {messages, create} = useMessages();
   const {username, uuid} = useUser();
+  const {isSynchronizing} = useSynchronization();
+  const realm = useRealm();
+  const flatlistRef = useRef();
 
   const [content, setContent] = useState('');
 
@@ -37,29 +43,49 @@ const Chat = () => {
   }, [content, create]);
 
   const renderItem = useCallback(
-    ({item}) => (
+    ({item: message}) => (
       <Message
-        authorUuid={item.author_uuid}
-        authorName={item.author_name}
-        content={item.content}
-        timestamps={item.timestamps}
+        authorUuid={message.author_uuid}
+        authorName={message.author_name}
+        content={message.content}
+        timestamps={message.timestamps}
       />
     ),
     [],
   );
 
-  const keyExtractor = useCallback((item) => item.uuid, []);
+  const keyExtractor = useCallback((message) => message.uuid, []);
+
+  useEffect(() => {
+    if (!realm || !flatlistRef.current) return;
+    const messageObjects = realm.objects('Message');
+    messageObjects.addListener(() => {
+      setTimeout(() => {
+        flatlistRef.current.scrollToEnd([true]);
+      }, 100);
+    });
+    return () => messageObjects.removeAllListeners();
+  }, [realm, flatlistRef]);
+
+  useEffect(() => {
+    if (!flatlistRef.current) return;
+    const keyboardDidShow = Keyboard.addListener('keyboardDidShow', () => {
+      flatlistRef.current.scrollToEnd([true]);
+    });
+    return () => keyboardDidShow.remove();
+  }, [flatlistRef]);
+
+  useEffect(() => {
+    if (!flatlistRef.current || isSynchronizing) return;
+    flatlistRef.current.scrollToEnd([true]);
+  }, [flatlistRef, isSynchronizing]);
 
   return (
     <Container>
-      <Toolbar
-        title="Chatting"
-        description="Lorem Ipsum, Dolor Sigmed, Igmum Sapien"
-        rightIcon="settings"
-        onPressRightIcon={navigateToSettings}
-      />
+      <Toolbar rightIcon="settings" onPressRightIcon={navigateToSettings} />
 
-      <FlatList
+      <MessageList
+        ref={flatlistRef}
         data={messages}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
@@ -69,16 +95,17 @@ const Chat = () => {
         <TextInputContainer>
           <TextInput
             placeholder="Say something..."
-            placeholderTextColor={gray}
+            placeholderTextColor={white_with_opacity_of_60}
             value={content}
             onChangeText={(text) => setContent(text)}
+            multiline
           />
 
-          <TextInputActions>
-            <PressableIcon name="smile" onPress={() => {}} />
-            <TextInputActionIconSpace />
-            <PressableIcon name="send" onPress={handleSubmitMessage} />
-          </TextInputActions>
+          <SubmitButton
+            onPress={handleSubmitMessage}
+            hitSlop={DEFAULT_HIT_SLOP}>
+            <Ionicons name="send-sharp" size={18} color={white} />
+          </SubmitButton>
         </TextInputContainer>
       )}
     </Container>

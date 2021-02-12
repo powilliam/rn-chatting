@@ -1,5 +1,6 @@
 import React, {memo} from 'react';
 import {useNetInfo} from '@react-native-community/netinfo';
+import {useTheme} from 'styled-components';
 
 import {useSynchronization} from 'src/contexts';
 
@@ -10,24 +11,35 @@ import {
   EmptySpace,
   Content,
   Title,
-  Description,
   StatusContainer,
   StatusMessage,
 } from './styles';
 
 const Toolbar = ({
   title,
-  description,
   leftIcon,
   onPressLeftIcon,
   rightIcon,
   onPressRightIcon,
 }) => {
-  const {isConnected, isInternetReachable} = useNetInfo();
+  const {isInternetReachable} = useNetInfo();
   const {isSynchronizing} = useSynchronization();
+  const {red, yellow} = useTheme();
 
   return (
     <>
+      {!isInternetReachable && (
+        <StatusContainer backgroundColor={red}>
+          <StatusMessage>Waiting connenction to sync...</StatusMessage>
+        </StatusContainer>
+      )}
+
+      {isSynchronizing && (
+        <StatusContainer backgroundColor={yellow}>
+          <StatusMessage>Synchronizing....</StatusMessage>
+        </StatusContainer>
+      )}
+
       <Container>
         {leftIcon ? (
           <PressableIcon name={leftIcon} onPress={onPressLeftIcon} />
@@ -36,9 +48,6 @@ const Toolbar = ({
         )}
         <Content>
           <Title>{title}</Title>
-          {description && (
-            <Description numberOfLines={1}>{description}</Description>
-          )}
         </Content>
         {rightIcon ? (
           <PressableIcon name={rightIcon} onPress={onPressRightIcon} />
@@ -46,22 +55,12 @@ const Toolbar = ({
           <EmptySpace />
         )}
       </Container>
-
-      <StatusContainer>
-        {!isConnected && !isInternetReachable && (
-          <StatusMessage red>
-            you’re offline. waiting connection to sync...
-          </StatusMessage>
-        )}
-        {isSynchronizing && <StatusMessage>synchronizing</StatusMessage>}
-      </StatusContainer>
     </>
   );
 };
 
 const arePropsEqual = (prevProps, nextProps) =>
   prevProps.title === nextProps.title &&
-  prevProps.description === nextProps.description &&
   prevProps.leftIcon === nextProps.leftIcon &&
   prevProps.rightIcon === nextProps.rightIcon;
 

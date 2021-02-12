@@ -19,32 +19,24 @@ export const EmptySpace = styled.View`
 `;
 
 export const Title = styled.Text`
-  font-size: 16px;
-  font-family: SourceSansPro-SemiBold;
+  font-size: 22px;
+  font-family: SourceSansPro-Bold;
   letter-spacing: 0.5px;
   color: ${({theme}) => theme.white};
 `;
 
-export const Description = styled.Text`
-  width: 166px;
-  margin-top: 2px;
-  font-size: 12.8px;
-  font-family: SourceSansPro-Regular;
-  letter-spacing: 0.4px;
-  color: ${({theme}) => theme.gray};
-`;
-
 export const StatusContainer = styled.View`
-  padding: 0px 16px;
-  padding-bottom: 16px;
+  padding: 8px 16px;
   align-items: center;
   justify-content: center;
+  background-color: ${({backgroundColor, theme}) =>
+    backgroundColor ?? theme.black};
 `;
 
 export const StatusMessage = styled.Text`
-  font-size: 12.8px;
+  font-size: 11px;
   font-family: SourceSansPro-Semibold;
-  letter-spacing: 0.4px;
-  color: ${({red, theme}) => (red ? theme.red : theme.white_with_opacity)};
+  letter-spacing: 1.5px;
+  color: ${({theme}) => theme.white};
   text-transform: uppercase;
 `;

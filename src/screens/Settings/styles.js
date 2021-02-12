@@ -11,16 +11,16 @@ export const InformationContainer = styled.View`
 `;
 
 export const InformationTitle = styled.Text`
-  font-family: SourceSansPro-SemiBold;
-  font-size: 12.8px;
-  letter-spacing: 0.4px;
-  color: ${({theme}) => theme.gray};
+  font-family: SourceSansPro-Bold;
+  font-size: 11px;
+  letter-spacing: 1.5px;
+  color: ${({theme}) => theme.white_with_opacity_of_60};
   text-transform: uppercase;
 `;
 
 export const InformationDescription = styled.Text`
   font-family: SourceSansPro-Regular;
-  font-size: 16px;
+  font-size: 17px;
   letter-spacing: 0.5px;
   color: ${({theme}) => theme.white};
   margin-top: 4px;
@@ -35,15 +35,15 @@ export const SettingsAction = styled.View`
 
 export const SettingsActionTitle = styled.Text`
   font-family: SourceSansPro-SemiBold;
-  font-size: 16px;
+  font-size: 17px;
   letter-spacing: 0.5px;
   color: ${({color, theme}) => color ?? theme.white};
 `;
 
 export const SettingsActionDescription = styled.Text`
   font-family: SourceSansPro-Regular;
-  font-size: 12.8px;
-  letter-spacing: 0.4px;
-  color: ${({theme}) => theme.gray};
+  font-size: 13px;
+  letter-spacing: 0.5px;
+  color: ${({theme}) => theme.white_with_opacity_of_60};
   margin-top: 4px;
 `;
