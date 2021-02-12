@@ -1,5 +1,6 @@
 import React, {memo, useMemo} from 'react';
 import {format} from 'date-fns';
+import {useTheme} from 'styled-components';
 
 import {useUser} from 'src/contexts';
 
@@ -7,10 +8,21 @@ import {Container, Timestamp, Content, Value} from './styles';
 
 const Message = ({authorUuid, authorName, content, timestamps}) => {
   const {uuid} = useUser();
+  const {blue, black_variant} = useTheme();
+
+  const isFromCurrentUser = useMemo(() => authorUuid === uuid, [
+    authorUuid,
+    uuid,
+  ]);
 
   const aligment = useMemo(
-    () => (authorUuid === uuid ? 'flex-end' : 'flex-start'),
-    [authorUuid, uuid],
+    () => (isFromCurrentUser ? 'flex-end' : 'flex-start'),
+    [isFromCurrentUser],
+  );
+
+  const backgroundColor = useMemo(
+    () => (isFromCurrentUser ? blue : black_variant),
+    [isFromCurrentUser, blue, black_variant],
   );
 
   const formatedTimestamp = useMemo(() => {
@@ -21,7 +33,7 @@ const Message = ({authorUuid, authorName, content, timestamps}) => {
   return (
     <Container aligment={aligment}>
       <Timestamp>{formatedTimestamp}</Timestamp>
-      <Content>
+      <Content backgroundColor={backgroundColor}>
         <Value>{content}</Value>
       </Content>
     </Container>
@@ -29,7 +41,7 @@ const Message = ({authorUuid, authorName, content, timestamps}) => {
 };
 
 const arePropsEqual = (prevProps, nextProps) =>
-  prevProps.value === nextProps.value &&
+  prevProps.content === nextProps.content &&
   prevProps.authorUuid === nextProps.authorUuid &&
   prevProps.authorName === nextProps.authorName &&
   prevProps.timestamps === nextProps.timestamps;

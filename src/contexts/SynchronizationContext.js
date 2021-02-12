@@ -1,5 +1,13 @@
-import React, {useState, useEffect, useContext, createContext} from 'react';
+import React, {
+  useState,
+  useEffect,
+  useMemo,
+  useContext,
+  createContext,
+} from 'react';
+import {StatusBar} from 'react-native';
 import {useNetInfo} from '@react-native-community/netinfo';
+import {useTheme} from 'styled-components';
 
 import {useRealm} from './RealmContext';
 
@@ -12,9 +20,16 @@ export const useSynchronization = () => useContext(SynchronizationContext);
 export const SynchronizationProvider = ({children}) => {
   const realm = useRealm();
   const {isConnected, isInternetReachable} = useNetInfo();
+  const {red, yellow, black} = useTheme();
 
   const [isSynchronizing, setIsSynchronizing] = useState(false);
   const [lastSync, setLastSync] = useState(null);
+
+  const statusBarBackgroundColor = useMemo(() => {
+    if (isSynchronizing) return yellow;
+    if (!isInternetReachable) return red;
+    else return black;
+  }, [isSynchronizing, isInternetReachable, yellow, red, black]);
 
   useEffect(() => {
     if (!realm || !isConnected || !isInternetReachable) return;
@@ -30,8 +45,14 @@ export const SynchronizationProvider = ({children}) => {
   }, [realm, isConnected, isInternetReachable]);
 
   return (
-    <SynchronizationContext.Provider value={{isSynchronizing, lastSync}}>
-      {children}
-    </SynchronizationContext.Provider>
+    <>
+      <StatusBar
+        barStyle="light-content"
+        backgroundColor={statusBarBackgroundColor}
+      />
+      <SynchronizationContext.Provider value={{isSynchronizing, lastSync}}>
+        {children}
+      </SynchronizationContext.Provider>
+    </>
   );
 };

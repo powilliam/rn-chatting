@@ -2,10 +2,11 @@ import styled from 'styled-components/native';
 
 export const Container = styled.SafeAreaView`
   flex: 1;
+  flex-grow: 1;
   background-color: ${({theme}) => theme.black};
 `;
 
-export const MessagesContainer = styled.View`
+export const MessageList = styled.FlatList`
   flex: 1;
 `;
 
@@ -13,26 +14,30 @@ export const TextInputContainer = styled.View`
   flex-direction: row;
   justify-content: space-between;
   align-items: center;
-  padding: 0px 16px;
-  height: 56px;
+  padding: 8px 8px 8px 14px;
+  min-height: 56px;
+  max-height: 160px;
+  border-width: 1px;
+  border-color: ${({theme}) => theme.black_variant};
+  border-radius: 32px;
+  margin: 6px;
 `;
 
 export const TextInput = styled.TextInput`
   flex: 1;
   font-family: SourceSansPro-Regular;
-  font-size: 16px;
+  font-size: 17px;
   letter-spacing: 0.5px;
   color: ${({theme}) => theme.white};
   margin-right: 24px;
 `;
 
-export const TextInputActions = styled.View`
-  flex-direction: row;
-  align-items: center;
+export const SubmitButton = styled.TouchableOpacity`
+  width: 40px;
+  height: 40px;
+  padding: 12px;
+  background-color: ${({theme}) => theme.blue};
+  border-radius: 20px;
   justify-content: center;
-`;
-
-export const TextInputActionIconSpace = styled.View`
-  width: 16px;
-  height: 16px;
+  align-items: center;
 `;
