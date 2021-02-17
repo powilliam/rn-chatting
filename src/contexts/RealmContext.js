@@ -1,27 +1,30 @@
 import React, {useState, useEffect, useContext, createContext} from 'react';
+import Realm from 'realm';
 
-import {getRealmInstance} from 'src/database';
+import {getSyncedRealmConfig} from 'src/database';
 
 export const RealmContext = createContext(null);
 
 export const useRealm = () => useContext(RealmContext);
 
 export const RealmProvider = ({children}) => {
-  const [realmInstance, setRealmInstance] = useState(null);
+  const [realm, setRealm] = useState(null);
 
   useEffect(() => {
-    if (realmInstance) return;
-    getRealmInstance()
-      .then(setRealmInstance)
-      .catch((error) => {
-        console.log(`Realm initialization failed due to ${error.message}`);
-      });
-    return () => realmInstance?.close();
-  }, [realmInstance]);
+    if (realm) return;
+    (async () => {
+      try {
+        const config = await getSyncedRealmConfig();
+        const instance = await Realm.open(config);
+        setRealm(instance);
+      } catch (error) {
+        console.log(`Cannot instanciate realm due to: ${error.message}`);
+      }
+    })();
+    return () => realm?.close();
+  }, [realm]);
 
   return (
-    <RealmContext.Provider value={realmInstance}>
-      {children}
-    </RealmContext.Provider>
+    <RealmContext.Provider value={realm}>{children}</RealmContext.Provider>
   );
 };

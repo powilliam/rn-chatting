@@ -8,10 +8,11 @@ import React, {
 import {StatusBar} from 'react-native';
 import {useNetInfo} from '@react-native-community/netinfo';
 import {useTheme} from 'styled-components';
+import AsyncStorage from '@react-native-async-storage/async-storage';
+
+import {TOKENS} from 'src/constants/storage';
 
 import {useRealm} from './RealmContext';
-
-import {synchronize} from 'src/database';
 
 export const SynchronizationContext = createContext({});
 
@@ -19,7 +20,7 @@ export const useSynchronization = () => useContext(SynchronizationContext);
 
 export const SynchronizationProvider = ({children}) => {
   const realm = useRealm();
-  const {isConnected, isInternetReachable} = useNetInfo();
+  const {isInternetReachable} = useNetInfo();
   const {red, yellow, black} = useTheme();
 
   const [isSynchronizing, setIsSynchronizing] = useState(false);
@@ -32,17 +33,20 @@ export const SynchronizationProvider = ({children}) => {
   }, [isSynchronizing, isInternetReachable, yellow, red, black]);
 
   useEffect(() => {
-    if (!realm || !isConnected || !isInternetReachable) return;
-    setIsSynchronizing(true);
-    synchronize(realm)
-      .then((timestamps) => {
+    if (!realm || !isInternetReachable) return;
+    (async () => {
+      try {
+        setIsSynchronizing(true);
+        await realm.syncSession.downloadAllServerChanges();
+        await realm.syncSession.uploadAllLocalChanges();
+      } finally {
+        const timestamps = Date.now();
+        await AsyncStorage.setItem(TOKENS.LAST_SYNC, timestamps.toString());
         setLastSync(timestamps);
         setIsSynchronizing(false);
-      })
-      .catch((_) => {
-        setIsSynchronizing(false);
-      });
-  }, [realm, isConnected, isInternetReachable]);
+      }
+    })();
+  }, [realm, isInternetReachable]);
 
   return (
     <>

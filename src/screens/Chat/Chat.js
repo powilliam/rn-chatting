@@ -54,7 +54,7 @@ const Chat = () => {
     [],
   );
 
-  const keyExtractor = useCallback((message) => message.uuid, []);
+  const keyExtractor = useCallback((message) => message._id, []);
 
   useEffect(() => {
     if (!realm || !flatlistRef.current) return;
