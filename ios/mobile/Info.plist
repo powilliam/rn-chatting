@@ -55,6 +55,9 @@
 	<false/>
 	<key>UIAppFonts</key>
 	<array>
+		<string>SourceSansPro-Bold.ttf</string>
+		<string>SourceSansPro-Regular.ttf</string>
+		<string>SourceSansPro-SemiBold.ttf</string>
 		<string>AntDesign.ttf</string>
 		<string>Entypo.ttf</string>
 		<string>EvilIcons.ttf</string>
