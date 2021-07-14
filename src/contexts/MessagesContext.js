@@ -9,10 +9,10 @@ import {v4 as uuidv4} from 'uuid';
 import {useNetInfo} from '@react-native-community/netinfo';
 import {io} from 'socket.io-client';
 
-import {apiService} from 'src/services';
+import {apiService} from 'src/providers';
 
 import {useRealm} from './RealmContext';
-import {useUser} from './UserContext';
+import {useAuth} from './AuthContext';
 import {useSynchronization} from './SynchronizationContext';
 
 export const MessagesContext = createContext({});
@@ -21,7 +21,7 @@ export const useMessages = () => useContext(MessagesContext);
 
 export const MessagesProvider = ({children}) => {
   const realm = useRealm();
-  const {username, uuid} = useUser();
+  const {user} = useAuth();
   const {isConnected, isInternetReachable} = useNetInfo();
   const {isSynchronizing} = useSynchronization();
 
@@ -69,8 +69,8 @@ export const MessagesProvider = ({children}) => {
         message = realm.create('Message', {
           uuid: uuidv4(),
           content,
-          author_uuid: uuid,
-          author_name: username,
+          author_uuid: user.uuid,
+          author_name: user.name,
           timestamps: Date.now(),
         });
       });
@@ -85,7 +85,7 @@ export const MessagesProvider = ({children}) => {
         });
       }
     },
-    [realm, uuid, isConnected, username, isInternetReachable],
+    [realm, isConnected, user, isInternetReachable],
   );
 
   const deleteAll = useCallback(() => {

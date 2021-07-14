@@ -2,7 +2,7 @@ import AsyncStorage from '@react-native-async-storage/async-storage';
 
 import {TOKENS} from 'src/constants/storage';
 
-import {apiService} from 'src/services';
+import {apiService} from 'src/providers';
 
 export const pull = async (realm, lastSync) => {
   const {

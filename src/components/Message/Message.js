@@ -2,17 +2,17 @@ import React, {memo, useMemo} from 'react';
 import {format} from 'date-fns';
 import {useTheme} from 'styled-components';
 
-import {useUser} from 'src/contexts';
+import {useAuth} from 'src/contexts';
 
 import {Container, Timestamp, Content, Value} from './styles';
 
 const Message = ({authorUuid, authorName, content, timestamps}) => {
-  const {uuid} = useUser();
+  const {user} = useAuth();
   const {blue, black_variant} = useTheme();
 
-  const isFromCurrentUser = useMemo(() => authorUuid === uuid, [
+  const isFromCurrentUser = useMemo(() => authorUuid === user.uuid, [
     authorUuid,
-    uuid,
+    user,
   ]);
 
   const aligment = useMemo(
@@ -27,8 +27,8 @@ const Message = ({authorUuid, authorName, content, timestamps}) => {
 
   const formatedTimestamp = useMemo(() => {
     const time = format(timestamps, 'p');
-    return authorUuid === uuid ? time : `${time} - ${authorName}`;
-  }, [timestamps, authorName, authorUuid, uuid]);
+    return isFromCurrentUser ? time : `${time} - ${authorName}`;
+  }, [timestamps, authorName, isFromCurrentUser]);
 
   return (
     <Container aligment={aligment}>
