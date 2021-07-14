@@ -2,15 +2,15 @@ import React from 'react';
 
 import {RealmProvider} from './RealmContext';
 import {SynchronizationProvider} from './SynchronizationContext';
-import {UserProvider} from './UserContext';
+import {AuthProvider} from './AuthContext';
 import {MessagesProvider} from './MessagesContext';
 
 export const AppProvider = ({children}) => (
   <RealmProvider>
     <SynchronizationProvider>
-      <UserProvider>
+      <AuthProvider>
         <MessagesProvider>{children}</MessagesProvider>
-      </UserProvider>
+      </AuthProvider>
     </SynchronizationProvider>
   </RealmProvider>
 );

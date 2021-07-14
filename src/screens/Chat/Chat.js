@@ -6,7 +6,7 @@ import Ionicons from 'react-native-vector-icons/Ionicons';
 
 import {DEFAULT_HIT_SLOP} from 'src/constants/touchables';
 
-import {useMessages, useUser, useRealm, useSynchronization} from 'src/contexts';
+import {useMessages, useAuth, useRealm, useSynchronization} from 'src/contexts';
 
 import {Toolbar, Message} from 'src/components';
 
@@ -22,14 +22,14 @@ const Chat = () => {
   const {white_with_opacity_of_60, white} = useTheme();
   const {navigate} = useNavigation();
   const {messages, create} = useMessages();
-  const {username, uuid} = useUser();
+  const {user} = useAuth();
   const {isSynchronizing} = useSynchronization();
   const realm = useRealm();
   const flatlistRef = useRef();
 
   const [content, setContent] = useState('');
 
-  const canSubmitMessages = useMemo(() => username && uuid, [username, uuid]);
+  const canSubmitMessages = useMemo(() => !!user, [user]);
 
   const navigateToSettings = useCallback(() => navigate('SettingsScreen'), [
     navigate,

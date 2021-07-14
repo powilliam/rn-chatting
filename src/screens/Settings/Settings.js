@@ -5,7 +5,7 @@ import {useTheme} from 'styled-components';
 import {format} from 'date-fns';
 import FeatherIcons from 'react-native-vector-icons/Feather';
 
-import {useMessages, useUser, useSynchronization} from 'src/contexts';
+import {useMessages, useAuth, useSynchronization} from 'src/contexts';
 
 import {Toolbar, Divider} from 'src/components';
 
@@ -25,11 +25,11 @@ const Settings = () => {
   const {goBack} = useNavigation();
   const {white_with_opacity_of_12, red, white} = useTheme();
   const {deleteAll} = useMessages();
-  const {username, uuid} = useUser();
+  const {user} = useAuth();
   const {lastSync} = useSynchronization();
 
-  const memoizedUsername = useMemo(() => username ?? 'UNSIGNED', [username]);
-  const memoizedUuid = useMemo(() => uuid ?? 'UNSIGNED', [uuid]);
+  const memoizedUsername = useMemo(() => user?.name ?? 'UNSIGNED', [user]);
+  const memoizedUuid = useMemo(() => user?.uuid ?? 'UNSIGNED', [user]);
   const formatedLastSync = useMemo(() => lastSync && format(lastSync, 'p'), [
     lastSync,
   ]);
