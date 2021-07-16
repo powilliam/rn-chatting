@@ -1,17 +1,12 @@
-import React, {
-  useState,
-  useEffect,
-  useContext,
-  useCallback,
-  createContext,
-} from 'react';
+import React, {useEffect, useContext, useCallback, createContext} from 'react';
 import {v4 as uuidv4} from 'uuid';
 import {useNetInfo} from '@react-native-community/netinfo';
 import {io} from 'socket.io-client';
 
-import {apiService} from 'src/providers';
+import {postMessage} from 'src/services';
 
-import {useRealm} from './RealmContext';
+import {database} from 'src/database';
+
 import {useAuth} from './AuthContext';
 import {useSynchronization} from './SynchronizationContext';
 
@@ -20,7 +15,6 @@ export const MessagesContext = createContext({});
 export const useMessages = () => useContext(MessagesContext);
 
 export const MessagesProvider = ({children}) => {
-  const realm = useRealm();
   const {user} = useAuth();
   const {isConnected, isInternetReachable} = useNetInfo();
   const {isSynchronizing} = useSynchronization();
@@ -32,70 +26,57 @@ export const MessagesProvider = ({children}) => {
     reconnection: false,
   });
 
-  const [messages, setMessages] = useState([]);
-
   useEffect(() => {
-    if (!realm) return;
-    const messageObjects = realm.objects('Message');
-    messageObjects.addListener(() => {
-      setMessages([...messageObjects.sorted('timestamps')]);
-    });
-    return () => messageObjects.removeAllListeners();
-  }, [realm]);
-
-  useEffect(() => {
-    if (!realm || isSynchronizing || !isConnected || !isInternetReachable)
-      return;
+    if (isSynchronizing || !isConnected || !isInternetReachable) return;
     socket.connect();
-    socket.on('new-message', (message) => {
-      realm.write(() => {
-        realm.create('Message', message, true);
+    socket.on('new-message', async (message) => {
+      await database.action(async () => {
+        if (message.author_uuid === user?.uuid) return;
+        await database.get('messages').create((it) => {
+          Object.assign(it, message);
+        });
       });
     });
-    socket.on('pushed-messages', (pushedMessages) => {
-      realm.write(() => {
-        pushedMessages.forEach((message) => {
-          realm.create('Message', message, true);
+    socket.on('pushed-messages', async (pushedMessages) => {
+      await database.action(async () => {
+        pushedMessages.forEach(async (message) => {
+          if (message.author_uuid === user?.uuid) return;
+          await database.get('messages').create((it) => {
+            Object.assign(it, message);
+          });
         });
       });
     });
     return () => socket.close();
-  }, [realm, socket, isSynchronizing, isConnected, isInternetReachable]);
+  }, [socket, user, isSynchronizing, isConnected, isInternetReachable]);
 
   const create = useCallback(
     async (content) => {
+      const isSynced = isConnected && isInternetReachable;
       let message;
-      realm.write(() => {
-        message = realm.create('Message', {
-          uuid: uuidv4(),
-          content,
-          author_uuid: user.uuid,
-          author_name: user.name,
-          timestamps: Date.now(),
+
+      await database.action(async () => {
+        message = await database.get('messages').create((it) => {
+          it.uuid = uuidv4();
+          it.content = content;
+          it.author_uuid = user.uuid;
+          it.author_name = user.name;
+          it.is_synchronized = isSynced;
+          it.timestamps = Date.now();
         });
       });
-      if (isConnected && isInternetReachable) {
-        await apiService.post('/v1/messages', message);
-      } else {
-        realm.write(() => {
-          realm.create('Scheduled', {
-            uuid: uuidv4(),
-            message,
-          });
-        });
+
+      if (isSynced) {
+        await postMessage(message._raw);
       }
     },
-    [realm, isConnected, user, isInternetReachable],
+    [isConnected, user, isInternetReachable],
   );
 
-  const deleteAll = useCallback(() => {
-    realm.write(() => {
-      realm.delete(messages);
-    });
-  }, [realm, messages]);
+  const deleteAll = useCallback(async () => {}, []);
 
   return (
-    <MessagesContext.Provider value={{messages, create, deleteAll}}>
+    <MessagesContext.Provider value={{create, deleteAll}}>
       {children}
     </MessagesContext.Provider>
   );

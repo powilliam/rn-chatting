@@ -52,10 +52,12 @@ const Settings = () => {
         <InformationDescription>{memoizedUuid}</InformationDescription>
       </InformationContainer>
 
-      <InformationContainer>
-        <InformationTitle>last synchronization</InformationTitle>
-        <InformationDescription>{formatedLastSync}</InformationDescription>
-      </InformationContainer>
+      {formatedLastSync && (
+        <InformationContainer>
+          <InformationTitle>last synchronization</InformationTitle>
+          <InformationDescription>{formatedLastSync}</InformationDescription>
+        </InformationContainer>
+      )}
 
       <Divider color={white_with_opacity_of_12} />
 

@@ -1,10 +1,19 @@
-import Realm from 'realm';
+import SQLiteAdapter from '@nozbe/watermelondb/adapters/sqlite';
+import {Database, appSchema} from '@nozbe/watermelondb';
 
-import {messageSchema, scheduledSchema} from './schemas';
+import {watermelonMessagesSchema} from './schemas';
 
-const realmConfig = {
-  schema: [messageSchema, scheduledSchema],
-  schemaVersion: 0,
-};
+import {Message} from './models';
 
-export const getRealmInstance = async () => await Realm.open(realmConfig);
+const databaseSchema = appSchema({
+  version: 1,
+  tables: [watermelonMessagesSchema],
+});
+
+export const database = new Database({
+  adapter: new SQLiteAdapter({
+    schema: databaseSchema,
+  }),
+  modelClasses: [Message],
+  actionsEnabled: true,
+});

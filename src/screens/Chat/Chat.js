@@ -2,11 +2,13 @@ import React, {useRef, useState, useEffect, useCallback, useMemo} from 'react';
 import {Keyboard} from 'react-native';
 import {useNavigation} from '@react-navigation/native';
 import {useTheme} from 'styled-components';
+import {withDatabase} from '@nozbe/watermelondb/DatabaseProvider';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import withObservables from '@nozbe/with-observables';
 
 import {DEFAULT_HIT_SLOP} from 'src/constants/touchables';
 
-import {useMessages, useAuth, useRealm, useSynchronization} from 'src/contexts';
+import {useMessages, useAuth, useSynchronization} from 'src/contexts';
 
 import {Toolbar, Message} from 'src/components';
 
@@ -18,14 +20,14 @@ import {
   SubmitButton,
 } from './styles';
 
-const Chat = () => {
+const Chat = ({$messages}) => {
+  const flatlistRef = useRef();
+
   const {white_with_opacity_of_60, white} = useTheme();
   const {navigate} = useNavigation();
-  const {messages, create} = useMessages();
+  const {create} = useMessages();
   const {user} = useAuth();
   const {isSynchronizing} = useSynchronization();
-  const realm = useRealm();
-  const flatlistRef = useRef();
 
   const [content, setContent] = useState('');
 
@@ -45,27 +47,16 @@ const Chat = () => {
   const renderItem = useCallback(
     ({item: message}) => (
       <Message
-        authorUuid={message.author_uuid}
-        authorName={message.author_name}
-        content={message.content}
-        timestamps={message.timestamps}
+        authorUuid={message._raw.author_uuid}
+        authorName={message._raw.author_name}
+        content={message._raw.content}
+        timestamps={message._raw.timestamps}
       />
     ),
     [],
   );
 
-  const keyExtractor = useCallback((message) => message.uuid, []);
-
-  useEffect(() => {
-    if (!realm || !flatlistRef.current) return;
-    const messageObjects = realm.objects('Message');
-    messageObjects.addListener(() => {
-      setTimeout(() => {
-        flatlistRef.current.scrollToEnd([true]);
-      }, 100);
-    });
-    return () => messageObjects.removeAllListeners();
-  }, [realm, flatlistRef]);
+  const keyExtractor = useCallback((message) => message._raw.id, []);
 
   useEffect(() => {
     if (!flatlistRef.current) return;
@@ -86,7 +77,7 @@ const Chat = () => {
 
       <MessageList
         ref={flatlistRef}
-        data={messages}
+        data={$messages}
         renderItem={renderItem}
         keyExtractor={keyExtractor}
       />
@@ -112,4 +103,8 @@ const Chat = () => {
   );
 };
 
-export default Chat;
+export default withDatabase(
+  withObservables([], ({database}) => ({
+    $messages: database.get('messages').query().observe(),
+  }))(Chat),
+);
