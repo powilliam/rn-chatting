@@ -12,6 +12,8 @@ target 'mobile' do
     inherit! :complete
     # Pods for testing
   end
+  
+  pod 'React-jsi', :path => '../node_modules/react-native/ReactCommon/jsi', :modular_headers => true
 
   # Enables Flipper.
   #

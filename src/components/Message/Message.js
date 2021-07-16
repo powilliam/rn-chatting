@@ -10,7 +10,7 @@ const Message = ({authorUuid, authorName, content, timestamps}) => {
   const {user} = useAuth();
   const {blue, black_variant} = useTheme();
 
-  const isFromCurrentUser = useMemo(() => authorUuid === user.uuid, [
+  const isFromCurrentUser = useMemo(() => authorUuid === user?.uuid, [
     authorUuid,
     user,
   ]);
