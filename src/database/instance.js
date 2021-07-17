@@ -13,6 +13,7 @@ const databaseSchema = appSchema({
 export const database = new Database({
   adapter: new SQLiteAdapter({
     schema: databaseSchema,
+    dbName: 'watermelon',
   }),
   modelClasses: [Message],
   actionsEnabled: true,
